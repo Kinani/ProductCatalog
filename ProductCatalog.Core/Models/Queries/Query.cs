@@ -5,10 +5,10 @@
         public int Page { get; protected set; }
         public int ItemsPerPage { get; protected set; }
 
-        public Query(int page, int itemsPerPage)
+        public Query(int? page, int? itemsPerPage)
         {
-            Page = page;
-            ItemsPerPage = itemsPerPage;
+            Page = page.GetValueOrDefault();
+            ItemsPerPage = itemsPerPage.GetValueOrDefault();
 
             if (Page <= 0)
             {

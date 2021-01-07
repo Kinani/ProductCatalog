@@ -13,8 +13,8 @@ namespace ProductCatalog.Core.Models.Queries
             string name, 
             decimal? price, 
             DateTime? lastUpdated, 
-            int page, 
-            int itemsPerPage) : base(page, itemsPerPage)
+            int? page, 
+            int? itemsPerPage) : base(page, itemsPerPage)
         {
             Id = id;
             Name = name;

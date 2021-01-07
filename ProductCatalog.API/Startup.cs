@@ -12,6 +12,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using ProductCatalog.API.Controllers.Config;
 using ProductCatalog.API.Extensions;
 using ProductCatalog.Infrastructure.Data;
 
@@ -33,7 +34,11 @@ namespace ProductCatalog.API
 
             services.AddCustomSwagger();
 
-            services.AddControllers();
+            services.AddControllers().ConfigureApiBehaviorOptions(options =>
+            {
+                // Adds a custom error response factory when ModelState is invalid
+                options.InvalidModelStateResponseFactory = InvalidModelStateResponseFactory.ProduceErrorResponse;
+            });
 
             services.AddDbContext<ProductCatalogContext>(options =>
             {
