@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using AutoMapper;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
@@ -11,6 +12,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using ProductCatalog.API.Extensions;
 using ProductCatalog.Infrastructure.Data;
 
 namespace ProductCatalog.API
@@ -27,12 +29,21 @@ namespace ProductCatalog.API
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddMemoryCache();
+
+            services.AddCustomSwagger();
+
+            services.AddControllers();
+
             services.AddDbContext<ProductCatalogContext>(options =>
             {
                 options.UseSqlServer(Configuration.GetConnectionString("ProductCatalogConnection"));
             });
 
-            services.AddControllers();
+            services.AddAutoMapper(typeof(Startup));
+
+            // Extension method to keep Startup.cs clean
+            services.AddServices(Configuration);
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -42,8 +53,10 @@ namespace ProductCatalog.API
             {
                 app.UseDeveloperExceptionPage();
             }
-
+            
             app.UseHttpsRedirection();
+
+            app.UseCustomSwagger();
 
             app.UseRouting();
 
