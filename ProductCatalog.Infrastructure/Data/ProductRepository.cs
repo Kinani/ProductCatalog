@@ -32,9 +32,9 @@ namespace ProductCatalog.Infrastructure.Data
 
             // Building the where expression by ProductsQuery
             queryable = queryable.Where(p => 
-                ((query.Id.HasValue && query.Id > 0) || p.Id == query.Id) &&
+                ((!query.Id.HasValue || query.Id == 0) || p.Id == query.Id) &&
                 (string.IsNullOrEmpty(query.Name) || query.Name.Contains(p.Name)) &&
-                ((query.Price.HasValue && query.Price > 0) || query.Price == p.Price));
+                ((!query.Price.HasValue || query.Price == 0) || query.Price == p.Price));
 
             // pagination count data.
             int totalItems = await queryable.CountAsync();

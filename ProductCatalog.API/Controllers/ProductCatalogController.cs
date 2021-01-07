@@ -47,7 +47,7 @@ namespace ProductCatalog.API.Controllers
         [HttpPost]
         [ProducesResponseType(typeof(ProductResource), 201)]
         [ProducesResponseType(typeof(ErrorResource), 400)]
-        public async Task<IActionResult> PostAsync([FromBody] SaveProductResource resource)
+        public async Task<IActionResult> PostAsync([FromForm] SaveProductResource resource)
         {
             var product = _mapper.Map<SaveProductResource, ProductDto>(resource);
             var result = await _productService.SaveAsync(product);
@@ -70,7 +70,7 @@ namespace ProductCatalog.API.Controllers
         [HttpPut("{id}")]
         [ProducesResponseType(typeof(ProductResource), 201)]
         [ProducesResponseType(typeof(ErrorResource), 400)]
-        public async Task<IActionResult> PutAsync(int id, [FromBody] SaveProductResource resource)
+        public async Task<IActionResult> PutAsync(int id, [FromForm] SaveProductResource resource)
         {
             var product = _mapper.Map<SaveProductResource, ProductDto>(resource);
             var result = await _productService.UpdateAsync(id, product);
