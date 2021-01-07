@@ -129,7 +129,7 @@ namespace ProductCatalog.Core.Services
             }
             catch (Exception ex)
             {
-                return new ProductResponse($"An error occurred when saving the product: {ex.Message}");
+                return new ProductResponse($"An error occurred when retrieving the product: {ex.Message}");
             }
 
         }
