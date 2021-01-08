@@ -12,6 +12,7 @@ namespace ProductCatalog.Core.Interfaces
         Task<ProductResponse> SaveAsync(ProductDto productDto);
         Task<ProductResponse> UpdateAsync(int id, ProductDto productDto);
         Task<ProductResponse> DeleteAsync(int id);
+        Task<ProductResponse> GetAsync(int id);
         Task<ExportResponse> ExportExcel(ProductsQuery productsQuery);
     }
 }

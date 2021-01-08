@@ -1,17 +1,11 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using AutoMapper;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.HttpsPolicy;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
 using ProductCatalog.API.Controllers.Config;
 using ProductCatalog.API.Extensions;
 using ProductCatalog.Infrastructure.Data;
@@ -49,6 +43,15 @@ namespace ProductCatalog.API
 
             // Extension method to keep Startup.cs clean
             services.AddServices(Configuration);
+
+            // TODO in production remove any origin
+            services.AddCors(options =>
+            {
+                options.AddPolicy("CorsPolicy",
+                    builder => builder.AllowAnyOrigin()
+                        .AllowAnyMethod()
+                        .AllowAnyHeader());
+            });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -60,6 +63,14 @@ namespace ProductCatalog.API
             }
             
             app.UseHttpsRedirection();
+
+            app.UseCors("CorsPolicy");
+
+            // Change serving static files from wwwroot to specified Media folder
+            app.UseStaticFiles(new StaticFileOptions
+            {
+                FileProvider = new PhysicalFileProvider(Configuration.GetValue<string>("MediaPath")),
+            });
 
             app.UseCustomSwagger();
 

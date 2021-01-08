@@ -5,6 +5,7 @@ using ProductCatalog.Core.Entities;
 using ProductCatalog.Core.Interfaces;
 using ProductCatalog.Core.Models;
 using ProductCatalog.Core.Models.Queries;
+using ProductCatalog.Core.Models.Responses;
 using System.IO;
 using System.Threading.Tasks;
 
@@ -45,13 +46,31 @@ namespace ProductCatalog.API.Controllers
         /// </summary>
         /// <returns>Excel sheet of products.</returns>
         [HttpGet("ExportExcel")]
-        [ProducesResponseType(typeof(QueryResultsResource<ProductResource>), 200)]
+        [ProducesResponseType(typeof(FileStreamResult), 200)]
         public async Task<ActionResult<MemoryStream>> ExportExcel([FromQuery] ProductsQueryResource query)
         {
             var productsQuery = _mapper.Map<ProductsQueryResource, ProductsQuery>(query);
             var exportResult = await _productService.ExportExcel(productsQuery);
 
-            return File(exportResult.Resource, "application/octet-stream", "products-catalog.xlsx");
+            return File(exportResult.Resource, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "products-catalog.xlsx");
+        }
+
+        /// <summary>
+        /// Gets product by ID.
+        /// </summary>
+        /// <returns>Product.</returns>
+        [HttpGet("GetById")]
+        [ProducesResponseType(typeof(ProductResource), 200)]
+        [ProducesResponseType(typeof(ErrorResource), 404)]
+        public async Task<IActionResult> Get([FromQuery] int id)
+        {
+            var product = await _productService.GetAsync(id);
+
+            if (!product.Success || product.Resource == null)
+                return NotFound(new ErrorResource(product.Message));
+
+            var resource = _mapper.Map<Product, ProductResource>(product.Resource);
+            return Ok(resource);
         }
 
         /// <summary>
@@ -116,8 +135,8 @@ namespace ProductCatalog.API.Controllers
                 return BadRequest(new ErrorResource(result.Message));
             }
 
-            var categoryResource = _mapper.Map<Product, ProductResource>(result.Resource);
-            return Ok(categoryResource);
+            var resource = _mapper.Map<Product, ProductResource>(result.Resource);
+            return Ok(resource);
         }
     }
 }
