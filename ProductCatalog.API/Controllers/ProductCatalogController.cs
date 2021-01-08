@@ -5,6 +5,7 @@ using ProductCatalog.Core.Entities;
 using ProductCatalog.Core.Interfaces;
 using ProductCatalog.Core.Models;
 using ProductCatalog.Core.Models.Queries;
+using System.IO;
 using System.Threading.Tasks;
 
 namespace ProductCatalog.API.Controllers
@@ -37,6 +38,20 @@ namespace ProductCatalog.API.Controllers
 
             var resource = _mapper.Map<QueryResults<Product>, QueryResultsResource<ProductResource>>(queryResult);
             return resource;
+        }
+
+        /// <summary>
+        /// Exports all existing products to Excel sheet.
+        /// </summary>
+        /// <returns>Excel sheet of products.</returns>
+        [HttpGet("ExportExcel")]
+        [ProducesResponseType(typeof(QueryResultsResource<ProductResource>), 200)]
+        public async Task<ActionResult<MemoryStream>> ExportExcel([FromQuery] ProductsQueryResource query)
+        {
+            var productsQuery = _mapper.Map<ProductsQueryResource, ProductsQuery>(query);
+            var exportResult = await _productService.ExportExcel(productsQuery);
+
+            return File(exportResult.Resource, "application/octet-stream", "products-catalog.xlsx");
         }
 
         /// <summary>

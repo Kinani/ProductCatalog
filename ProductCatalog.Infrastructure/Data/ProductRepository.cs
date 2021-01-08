@@ -40,7 +40,8 @@ namespace ProductCatalog.Infrastructure.Data
             int totalItems = await queryable.CountAsync();
 
             // Apply pagination to Queryable
-            List<Product> products = await queryable.Skip((query.Page - 1) * query.ItemsPerPage)
+            List<Product> products = await queryable.OrderBy(o => o.Id)
+                                                    .Skip((query.Page - 1) * query.ItemsPerPage)
                                                     .Take(query.ItemsPerPage)
                                                     .ToListAsync();
 

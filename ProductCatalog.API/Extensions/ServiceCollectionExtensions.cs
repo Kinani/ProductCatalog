@@ -19,6 +19,7 @@ namespace ProductCatalog.API.Extensions
             services.AddScoped<IProductService, ProductService>();
             services.AddScoped<IFileSystem, WebFileSystem>(x =>
                 new WebFileSystem(configuration.GetValue<string>("MediaPath")));
+            services.AddScoped<IFileExportService, FileExportService>();
 
             return services;
         }

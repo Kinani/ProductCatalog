@@ -6,6 +6,8 @@ using ProductCatalog.Core.Models;
 using ProductCatalog.Core.Models.Queries;
 using ProductCatalog.Core.Models.Responses;
 using System;
+using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace ProductCatalog.Core.Services
@@ -14,14 +16,17 @@ namespace ProductCatalog.Core.Services
     {
         private readonly IProductRepository _productRepository;
         private readonly IFileSystem _fileSystem;
+        private readonly IFileExportService _fileExportService;
         private readonly IMemoryCache _cache;
 
         public ProductService(IProductRepository productRepository,
             IFileSystem fileSystem,
+            IFileExportService fileExportService,
             IMemoryCache cache)
         {
             _productRepository = productRepository;
             _fileSystem = fileSystem;
+            _fileExportService = fileExportService;
             _cache = cache;
         }
 
@@ -67,7 +72,7 @@ namespace ProductCatalog.Core.Services
 
                 await _productRepository.AddAsync(product);
                 await _productRepository.CompleteAsync();
-                
+
                 return new ProductResponse(product);
             }
             catch (Exception ex)
@@ -125,6 +130,33 @@ namespace ProductCatalog.Core.Services
                 return new ProductResponse($"An error occurred when retrieving the product: {ex.Message}");
             }
 
+        }
+
+        public async Task<ExportResponse> ExportExcel(ProductsQuery productsQuery)
+        {
+            try
+            {
+                var products = await ListAsync(productsQuery);
+
+                if (products.Items == null || products.Items.Count == 0)
+                    return new ExportResponse("No products found");
+
+                var memoryStream = _fileExportService.ExportExcel(products.Items.Select(p =>
+                new ProductExportDto
+                {
+                    Id = p.Id,
+                    Name = p.Name,
+                    Photo = p.Photo,
+                    Price = p.Price,
+                    LastUpdated = p.LastUpdated.ToString("dd/MM/yyyy HH:mm:ss")
+                }), "Products");
+
+                return new ExportResponse(memoryStream);
+            }
+            catch (Exception ex)
+            {
+                return new ExportResponse($"An error occurred when exporting products: {ex.Message}");
+            }
         }
 
         // Cache single product
