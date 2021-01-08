@@ -44,6 +44,8 @@ namespace ProductCatalog.API
             // Extension method to keep Startup.cs clean
             services.AddServices(Configuration);
 
+            services.AddHttpContextAccessor();
+
             // TODO in production remove any origin
             services.AddCors(options =>
             {

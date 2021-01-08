@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Caching.Memory;
+﻿using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Caching.Memory;
 using ProductCatalog.Core.Cache;
 using ProductCatalog.Core.Entities;
 using ProductCatalog.Core.Interfaces;
@@ -17,16 +18,19 @@ namespace ProductCatalog.Core.Services
         private readonly IProductRepository _productRepository;
         private readonly IFileSystem _fileSystem;
         private readonly IFileExportService _fileExportService;
+        private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly IMemoryCache _cache;
 
         public ProductService(IProductRepository productRepository,
             IFileSystem fileSystem,
             IFileExportService fileExportService,
+            IHttpContextAccessor httpContextAccessor,
             IMemoryCache cache)
         {
             _productRepository = productRepository;
             _fileSystem = fileSystem;
             _fileExportService = fileExportService;
+            _httpContextAccessor = httpContextAccessor;
             _cache = cache;
         }
 
@@ -146,7 +150,7 @@ namespace ProductCatalog.Core.Services
                 {
                     Id = p.Id,
                     Name = p.Name,
-                    Photo = p.Photo,
+                    Photo = $"{GetHostURL()}/{p.Photo}",
                     Price = p.Price,
                     LastUpdated = p.LastUpdated.ToString("dd/MM/yyyy HH:mm:ss")
                 }), "Products");
@@ -167,5 +171,10 @@ namespace ProductCatalog.Core.Services
             key = string.Concat(key, "_", id);
             return key;
         }
+
+        // To build url for Photos
+        private string GetHostURL() =>
+            $"{_httpContextAccessor.HttpContext.Request.Scheme}://" +
+            $"{_httpContextAccessor.HttpContext.Request.Host}";
     }
 }

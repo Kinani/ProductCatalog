@@ -9,7 +9,7 @@ namespace ProductCatalog.Core.Models
         public int Id { get; set; }
         [DisplayName("Name")]
         public string Name { get; set; }
-        [DisplayName("Photo path")]
+        [DisplayName("Photo link")]
         public string Photo { get; set; }
         [DisplayName("Price")]
         public decimal Price { get; set; }
