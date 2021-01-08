@@ -14,9 +14,13 @@ namespace ProductCatalog.API
 {
     public class Startup
     {
-        public Startup(IConfiguration configuration)
+        public Startup(IWebHostEnvironment environment)
         {
-            Configuration = configuration;
+            Configuration = new ConfigurationBuilder()
+                            .SetBasePath(environment.ContentRootPath)
+                        .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
+                        .AddJsonFile($"appsettings.{environment.EnvironmentName}.json", optional: true)
+                        .AddEnvironmentVariables().Build();
         }
 
         public IConfiguration Configuration { get; }
