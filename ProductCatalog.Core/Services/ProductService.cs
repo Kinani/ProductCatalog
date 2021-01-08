@@ -37,6 +37,8 @@ namespace ProductCatalog.Core.Services
                 _fileSystem.DeletePicture(existingProduct.Photo);
                 _productRepository.Remove(existingProduct);
                 await _productRepository.CompleteAsync();
+                // Remove from memory cache
+                _cache.Remove(GetCacheKeyForProductQuery(id));
 
                 return new ProductResponse(existingProduct);
             }
@@ -48,16 +50,7 @@ namespace ProductCatalog.Core.Services
 
         public async Task<QueryResults<Product>> ListAsync(ProductsQuery query)
         {
-            string cacheKey = GetCacheKeyForProductsQuery(query);
-
-            var products = await _cache.GetOrCreateAsync(cacheKey, (entry) =>
-            {
-                // TODO invalidate cache in case of product add/remove
-                entry.AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(1);
-                return _productRepository.ListAsync(query);
-            });
-
-            return products;
+            return await _productRepository.ListAsync(query);
         }
 
         public async Task<ProductResponse> SaveAsync(ProductDto productDto)
@@ -74,7 +67,7 @@ namespace ProductCatalog.Core.Services
 
                 await _productRepository.AddAsync(product);
                 await _productRepository.CompleteAsync();
-
+                
                 return new ProductResponse(product);
             }
             catch (Exception ex)
@@ -100,6 +93,7 @@ namespace ProductCatalog.Core.Services
 
                 _productRepository.Update(existingProduct);
                 await _productRepository.CompleteAsync();
+                _cache.Remove(GetCacheKeyForProductQuery(id));
 
                 return new ProductResponse(existingProduct);
             }
@@ -117,7 +111,6 @@ namespace ProductCatalog.Core.Services
 
                 var product = await _cache.GetOrCreateAsync(cacheKey, (entry) =>
                 {
-                    // TODO invalidate cache in case of product update/remove
                     entry.AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(1);
                     return _productRepository.FindByIdAsync(id);
                 });
@@ -132,15 +125,6 @@ namespace ProductCatalog.Core.Services
                 return new ProductResponse($"An error occurred when retrieving the product: {ex.Message}");
             }
 
-        }
-
-        // Cache products by Pages
-        private string GetCacheKeyForProductsQuery(ProductsQuery query)
-        {
-            string key = CacheKeys.ProductsList.ToString();
-
-            key = string.Concat(key, "_", query.Page, "_", query.ItemsPerPage);
-            return key;
         }
 
         // Cache single product
