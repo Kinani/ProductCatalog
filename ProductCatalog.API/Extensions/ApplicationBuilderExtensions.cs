@@ -1,4 +1,7 @@
 ﻿using Microsoft.AspNetCore.Builder;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
+using ProductCatalog.Infrastructure.Data;
 
 namespace ProductCatalog.API.Extensions
 {
@@ -11,6 +14,17 @@ namespace ProductCatalog.API.Extensions
                 options.SwaggerEndpoint("/swagger/v1/swagger.json", "ProductCatalog APIs");
                 options.DocumentTitle = "ProductCatalog APIs";
             });
+            return app;
+        }
+
+        public static IApplicationBuilder ApplyEfMigrations(this IApplicationBuilder app)
+        {
+            var serviceScopeFactory = app.ApplicationServices.GetRequiredService<IServiceScopeFactory>();
+            using var scope = serviceScopeFactory.CreateScope();
+            var dbContext = scope.ServiceProvider.GetRequiredService<ProductCatalogContext>();
+            if (dbContext != null)
+                dbContext.Database.Migrate();
+
             return app;
         }
     }

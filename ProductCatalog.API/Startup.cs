@@ -88,6 +88,9 @@ namespace ProductCatalog.API
             {
                 endpoints.MapControllers();
             });
+
+            // Apply migrations on DB
+            app.ApplyEfMigrations();
         }
     }
 }
